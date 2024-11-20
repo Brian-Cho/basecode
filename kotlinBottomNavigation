@@ -1,0 +1,171 @@
+// 네비게이션 파일
+package com.example.vocabularyapp
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.*
+import com.example.vocabularyapp.ui.theme.VocabularyAppTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            VocabularyAppTheme {
+                MainScreen()
+            }
+        }
+    }
+}
+
+@Composable
+fun MainScreen() {
+    val navController = rememberNavController()
+    Scaffold(
+        bottomBar = { BottomNavigationBar(navController) }
+    ) { innerPadding ->
+        Navigation(navController, Modifier.padding(innerPadding))
+    }
+}
+
+@Composable
+fun Navigation(navController: NavHostController, modifier: Modifier = Modifier) {
+    NavHost(
+        navController = navController,
+        startDestination = BottomNavItem.Home.route,
+        modifier = modifier
+    ) {
+        composable(BottomNavItem.Home.route) { HomeScreen() }
+        composable(BottomNavItem.Vocabulary.route) { VocabularyScreen() }
+        composable(BottomNavItem.MyPage.route) { MyPageScreen() }
+        composable(BottomNavItem.Settings.route) { SettingsScreen() }
+        composable(BottomNavItem.About.route) { AboutScreen() }
+    }
+}
+
+@Composable
+fun BottomNavigationBar(navController: NavHostController) {
+    val items = BottomNavItem.allItems
+    NavigationBar {
+        val currentDestination by navController.currentBackStackEntryAsState()
+        val currentRoute = currentDestination?.destination?.route
+        items.forEach { item ->
+            NavigationBarItem(
+                icon = { Icon(item.icon, contentDescription = item.title) },
+                label = { Text(item.title) },
+                selected = currentRoute == item.route,
+                onClick = {
+                    if (currentRoute != item.route) {
+                        navController.navigate(item.route) {
+                            // 현재 스택을 유지하고 중복 생성을 방지
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                }
+            )
+        }
+    }
+}
+
+sealed class BottomNavItem(val title: String, val route: String, val icon: ImageVector) {
+    object Home : BottomNavItem("홈", "home", Icons.Default.Home)
+    object Vocabulary : BottomNavItem("단어", "vocabulary", Icons.Default.AccountBox)
+    object MyPage : BottomNavItem("마이페이지", "mypage", Icons.Default.Person)
+    object Settings : BottomNavItem("설정", "settings", Icons.Default.Settings)
+    object About : BottomNavItem("정보", "about", Icons.Default.Info)
+
+    companion object {
+        val allItems = listOf(Home, Vocabulary, MyPage, Settings, About)
+    }
+}
+
+// HomeScreen.kt
+package com.example.vocabularyapp
+
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+
+@Composable
+fun HomeScreen(modifier: Modifier = Modifier) {
+    Text(
+        text = "홈 화면",
+        modifier = modifier
+    )
+}
+
+// VocabularyScreen.kt
+package com.example.vocabularyapp
+
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+
+@Composable
+fun VocabularyScreen(modifier: Modifier = Modifier) {
+    Text(
+        text = "영단어 페이지",
+        modifier = modifier
+    )
+}
+
+// MyPageScreen.kt
+package com.example.vocabularyapp
+
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+
+@Composable
+fun MyPageScreen(modifier: Modifier = Modifier) {
+    Text(
+        text = "마이페이지",
+        modifier = modifier
+    )
+}
+
+// SettingsScreen.kt
+package com.example.vocabularyapp
+
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+
+@Composable
+fun SettingsScreen(modifier: Modifier = Modifier) {
+    Text(
+        text = "설정 화면",
+        modifier = modifier
+    )
+}
+
+// AboutScreen.kt
+package com.example.vocabularyapp
+
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+
+@Composable
+fun AboutScreen(modifier: Modifier = Modifier) {
+    Text(
+        text = "앱 정보",
+        modifier = modifier
+    )
+}
