@@ -1,0 +1,240 @@
+// 사이드 파일
+// MainActivity.kt
+package com.example.vocabularyapp
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.*
+import com.example.vocabularyapp.ui.theme.VocabularyAppTheme
+import kotlinx.coroutines.launch
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            VocabularyAppTheme {
+                MainScreen()
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainScreen() {
+    val navController = rememberNavController()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            DrawerContent(navController, drawerState)
+        },
+        scrimColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Vocabulary App") },
+                    navigationIcon = {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            Icon(Icons.Default.Menu, contentDescription = "메뉴 열기")
+                        }
+                    }
+                )
+            }
+        ) { innerPadding ->
+            Navigation(navController, Modifier.padding(innerPadding))
+        }
+    }
+}
+
+@Composable
+fun DrawerContent(navController: NavHostController, drawerState: DrawerState) {
+    val scope = rememberCoroutineScope()
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(0.8f) // 너비 80%
+            .fillMaxHeight()    // 높이 전체
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        DrawerHeader()
+        NavItem.allItems.forEach { item ->
+            DrawerItem(
+                item = item,
+                isSelected = currentRoute == item.route,
+                onItemClick = {
+                    scope.launch {
+                        drawerState.close()
+                        navController.navigate(item.route) {
+                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun DrawerHeader() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(150.dp)
+            .padding(16.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Text(text = "로고", style = MaterialTheme.typography.headlineMedium)
+    }
+}
+
+@Composable
+fun DrawerItem(item: NavItem, isSelected: Boolean, onItemClick: () -> Unit) {
+    val backgroundColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surface
+    val contentColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onItemClick() }
+            .background(backgroundColor)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(item.icon, contentDescription = item.title, tint = contentColor)
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(text = item.title, style = MaterialTheme.typography.bodyLarge, color = contentColor)
+    }
+}
+
+@Composable
+fun Navigation(navController: NavHostController, modifier: Modifier = Modifier) {
+    NavHost(
+        navController = navController,
+        startDestination = NavItem.Home.route,
+        modifier = modifier
+    ) {
+        composable(NavItem.Home.route) { HomeScreen() }
+        composable(NavItem.Vocabulary.route) { VocabularyScreen() }
+        composable(NavItem.MyPage.route) { MyPageScreen() }
+        composable(NavItem.Settings.route) { SettingsScreen() }
+        composable(NavItem.About.route) { AboutScreen() }
+    }
+}
+
+sealed class NavItem(val title: String, val route: String, val icon: ImageVector) {
+    object Home : NavItem("홈", "home", Icons.Default.Home)
+    object Vocabulary : NavItem("단어", "vocabulary", Icons.Default.AccountBox)
+    object MyPage : NavItem("마이페이지", "mypage", Icons.Default.Person)
+    object Settings : NavItem("설정", "settings", Icons.Default.Settings)
+    object About : NavItem("정보", "about", Icons.Default.Info)
+
+    companion object {
+        val allItems = listOf(Home, Vocabulary, MyPage, Settings, About)
+    }
+}
+
+// HomeScreen.kt
+package com.example.vocabularyapp
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+
+@Composable
+fun HomeScreen(modifier: Modifier = Modifier) {
+    Text(
+        text = "홈 화면",
+        modifier = modifier.padding(20.dp)
+    )
+}
+
+// VocabularyScreen.kt
+package com.example.vocabularyapp
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun VocabularyScreen(modifier: Modifier = Modifier) {
+    Text(
+        text = "영단어 페이지",
+        modifier = modifier.padding(20.dp)
+    )
+}
+
+// MyPageScreen.kt
+package com.example.vocabularyapp
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun MyPageScreen(modifier: Modifier = Modifier) {
+    Text(
+        text = "마이페이지",
+        modifier = modifier.padding(20.dp)
+    )
+}
+
+// SettingsScreen.kt
+package com.example.vocabularyapp
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun SettingsScreen(modifier: Modifier = Modifier) {
+    Text(
+        text = "설정 화면",
+        modifier = modifier.padding(20.dp)
+    )
+}
+
+// AboutScreen.kt
+package com.example.vocabularyapp
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun AboutScreen(modifier: Modifier = Modifier) {
+    Text(
+        text = "앱 정보",
+        modifier = modifier.padding(20.dp)
+    )
+}
